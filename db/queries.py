@@ -2,11 +2,22 @@ from db.connection import init_connection
 import pandas as pd
 import streamlit as st
 
-def execute_query(query):
+def execute_query(collection_name, filter_query=None):
     conn = init_connection()
     if conn is not None:
         try:
-            df = pd.read_sql(query, conn)
+            # Acessar a coleção
+            db = conn['bd_unesp_marketplace']  # Substitua <dbname> pelo nome do seu banco de dados
+            collection = db[collection_name]
+
+            # Executar a consulta
+            if filter_query is None:
+                cursor = collection.find()  # Buscar todos os documentos
+            else:
+                cursor = collection.find(filter_query)  # Aplicar o filtro
+
+            # Converter o cursor para uma lista de documentos e depois para um DataFrame
+            df = pd.DataFrame(list(cursor))
             return df
         except Exception as e:
             st.error(f"Erro ao executar a consulta: {e}")

@@ -1,5 +1,6 @@
 import os
-import psycopg2
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 import streamlit as st
 from dotenv import load_dotenv
 
@@ -7,15 +8,12 @@ if os.getenv('ENV') == 'development':
     load_dotenv()
 
 def init_connection():
+    uri = f"mongodb+srv://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}?appName={os.getenv('DB_APPNAME')}"
+
     try:
-        conn = psycopg2.connect(
-            host=os.getenv('DB_HOST'),
-            database=os.getenv('DB_NAME'),
-            user=os.getenv('DB_USER'),
-            password=os.getenv('DB_PASSWORD'),
-            port=os.getenv('DB_PORT')
-        )
-        return conn
+        # Create a new client and connect to the server
+        client = MongoClient(uri, server_api=ServerApi('1'))
+        return client
     except Exception as e:
         st.error(f"Erro na conexão: {e}")
         return None
